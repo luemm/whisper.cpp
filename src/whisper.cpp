@@ -5444,6 +5444,8 @@ struct whisper_vad_segments * whisper_vad_segments_from_probs(
     return vad_segments;
 }
 
+#include "ten-vad.hpp"
+
 struct whisper_vad_segments * whisper_vad_segments_from_samples(
         whisper_vad_context * vctx,
         whisper_vad_params params,
@@ -6635,20 +6637,25 @@ static bool whisper_vad(
     state->vad_mapping_table.clear();
     state->has_vad_segments = false;
 
-    if (state->vad_context == nullptr) {
-        struct whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
-        struct whisper_vad_context * vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
-        if (vctx == nullptr) {
-            WHISPER_LOG_ERROR("%s: failed to initialize VAD context\n", __func__);
-            return false;
-        }
-        state->vad_context = vctx;
-    }
-    auto vctx = state->vad_context;
-
-    const whisper_vad_params & vad_params = params.vad_params;
-
-    whisper_vad_segments * vad_segments = whisper_vad_segments_from_samples(vctx, vad_params, samples, n_samples);
+	whisper_vad_segments * vad_segments = nullptr;
+	const whisper_vad_params & vad_params = params.vad_params;
+	whisper_vad_context * vctx = nullptr;
+	if (strcmp(params.vad_model_path,"TEN_VAD") == 0) {
+		vad_segments = whisper_ten_vad_segments_from_samples(vad_params, samples, n_samples);
+	}
+	else {
+		if (state->vad_context == nullptr) {
+			struct whisper_vad_context_params vad_ctx_params = whisper_vad_default_context_params();
+			struct whisper_vad_context * vctx = whisper_vad_init_from_file_with_params(params.vad_model_path, vad_ctx_params);
+			if (vctx == nullptr) {
+				WHISPER_LOG_ERROR("%s: failed to initialize VAD context\n", __func__);
+				return false;
+			}
+			state->vad_context = vctx;
+		}
+		vctx = state->vad_context;
+		vad_segments = whisper_vad_segments_from_samples(vctx, vad_params, samples, n_samples);
+	}
 
     if (vad_segments->data.size() > 0) {
         state->has_vad_segments = true;

@@ -89,8 +89,12 @@ option(WHISPER_COREML                "whisper: enable Core ML framework"  OFF)
 option(WHISPER_COREML_ALLOW_FALLBACK "whisper: allow non-CoreML fallback" OFF)
 option(WHISPER_OPENVINO              "whisper: support for OpenVINO"      OFF)
 
+INCLUDE_DIRECTORIES(/data/ten-vad/include)
+
 # Required for relocatable CMake package
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/build-info.cmake)
+add_library(ten_vad SHARED IMPORTED)
+set_property(TARGET ten_vad PROPERTY IMPORTED_LOCATION "/data/ten-vad/lib/Linux/x64/libten_vad.so")
 
 # override ggml options
 set(GGML_SANITIZE_THREAD    ${WHISPER_SANITIZE_THREAD})

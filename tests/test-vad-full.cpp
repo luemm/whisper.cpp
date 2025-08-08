@@ -14,7 +14,7 @@
 
 int main() {
     std::string whisper_model_path = "../../models/ggml-base.en.bin";
-    std::string vad_model_path     = "../../models/for-tests-silero-v5.1.2-ggml.bin";
+    std::string vad_model_path     = "TEN_VAD";//"../../models/for-tests-silero-v5.1.2-ggml.bin";
     std::string sample_path        = "../../samples/jfk.wav";
 
     // Load the sample audio file
